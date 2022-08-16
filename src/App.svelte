@@ -59,8 +59,8 @@
     console.log(seed);
     let a = await fetch(
       "https://dev.tatoeba.org/en/api_v0/search?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
-        // seed
-        "TxWJ"
+        seed
+      // "TxWJ"
       // "PSlA"
       // "JnkI"
     ).then((r) => r.json());
