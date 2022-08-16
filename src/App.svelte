@@ -59,7 +59,8 @@
     console.log(seed);
     let a = await fetch(
       "https://dev.tatoeba.org/en/api_v0/search?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
-        seed
+        // seed
+        "TxWJ"
       // "PSlA"
       // "JnkI"
     ).then((r) => r.json());
@@ -84,7 +85,7 @@
 
     // document.getElementById("cmnText").innerText = chineseText;
 
-    pinyinTextList = r.transcriptions[1].html.split(/[, .]/);
+    pinyinTextList = r.transcriptions[1].html.split(/[, .?]/);
     // pinyinTextList =
     //   "Mǎl&igrave;y&agrave; h&eacute; n&agrave; tǎ l&igrave; y&agrave; q&ugrave; g&ograve;uw&ugrave;. tāmen w&egrave;i z&igrave;jǐ mǎi xiē dōngxi.".split(
     //     /[, .]/
@@ -157,7 +158,7 @@
     // console.log(extractedVerbs);
 
     // figure out pinyin
-    let numeralPinyins = r.transcriptions[1].text.split(/[, .]/);
+    let numeralPinyins = r.transcriptions[1].text.split(/[, .?]/);
     // numeralPinyins =
     //   "Ma3li4ya4 he2 na4 ta3 li4 ya4 qu4 gou4wu4. ta1men5 wei4 zi4ji3 mai3 xie1 dong1xi5.".split(
     //     /[, .]/
@@ -265,6 +266,13 @@
       rubyTexts = rubyTexts;
       // console.log(rubyTexts);
     }
+
+    // if we are still missing a final ? we got to add it
+    // if (rubyTexts[rubyTexts.length - 1].text[rubyTexts[rubyTexts.length - 1].text.length - 1] == "?"){
+    //   if (rubyTexts[rubyTexts.length - 1].chars != "？"){
+    //     rubyTexts = [...rubyTexts, console.]
+    //   }
+    // }
 
     // get translations for each word!!
 
