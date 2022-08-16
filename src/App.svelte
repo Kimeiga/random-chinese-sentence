@@ -1,4 +1,25 @@
-<script defer>
+<script>
+  var decodeEntities = (function () {
+    // this prevents any overhead from creating the object each time
+    var element = document.createElement("div");
+
+    function decodeHTMLEntities(str) {
+      if (str && typeof str === "string") {
+        // strip script/html tags
+        str = str.replace(/<script[^>]*>([\S\s]*?)<\/script>/gim, "");
+        str = str.replace(/<\/?\w(?:[^"'>]|"[^"]*"|'[^']*')*>/gim, "");
+        element.innerHTML = str;
+        str = element.textContent;
+        element.textContent = "";
+      }
+
+      return str;
+    }
+
+    return decodeHTMLEntities;
+  })();
+
+  import axios from "axios";
   import pos from "pos";
   import chunker from "pos-chunker";
 
@@ -57,13 +78,17 @@
   (async () => {
     const seed = makeid(4);
     console.log(seed);
-    let a = await fetch(
-      "https://dev.tatoeba.org/en/api_v0/search?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
-        seed
-      // "TxWJ"
-      // "PSlA"
-      // "JnkI"
-    ).then((r) => r.json());
+    let a = await axios
+      .get(
+        "https://dev.tatoeba.org/en/api_v0/search?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
+          seed
+        // "0SbA"
+        // "J73O"
+        // "TxWJ"
+        // "PSlA"
+        // "JnkI"
+      )
+      .then((r) => r.data);
 
     let r = a.results[0];
 
@@ -85,7 +110,9 @@
 
     // document.getElementById("cmnText").innerText = chineseText;
 
-    pinyinTextList = r.transcriptions[1].html.split(/[, .?]/);
+    pinyinTextList = decodeEntities(r.transcriptions[1].html);
+    pinyinTextList = pinyinTextList.split(/[, .?";]/);
+    // pinyinTextList = r.transcriptions[1].html.split("[\\&\\;]");
     // pinyinTextList =
     //   "Mǎl&igrave;y&agrave; h&eacute; n&agrave; tǎ l&igrave; y&agrave; q&ugrave; g&ograve;uw&ugrave;. tāmen w&egrave;i z&igrave;jǐ mǎi xiē dōngxi.".split(
     //     /[, .]/
@@ -158,7 +185,7 @@
     // console.log(extractedVerbs);
 
     // figure out pinyin
-    let numeralPinyins = r.transcriptions[1].text.split(/[, .?]/);
+    let numeralPinyins = r.transcriptions[1].text.split(/[, .?";]/);
     // numeralPinyins =
     //   "Ma3li4ya4 he2 na4 ta3 li4 ya4 qu4 gou4wu4. ta1men5 wei4 zi4ji3 mai3 xie1 dong1xi5.".split(
     //     /[, .]/
@@ -219,10 +246,10 @@
 
     for (let rubyText of rubyTexts) {
       let res = await (
-        await fetch(
+        await axios.get(
           "https://chinese-dictionary.azurewebsites.net/" + rubyText.chars
         )
-      ).json();
+      ).data;
       // console.log(r);
       console.log(res);
 
