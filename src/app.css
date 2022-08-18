@@ -178,3 +178,7 @@ button:hover {
   cursor: pointer;
   opacity: .4;
 }
+
+.main-ruby {
+  margin: 1rem 0;
+}

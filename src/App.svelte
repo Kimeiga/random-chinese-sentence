@@ -82,7 +82,8 @@
       .get(
         "https://tatoeba.elnu.com/?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
           // "https://dev.tatoeba.org/en/api_v0/search?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
-          seed
+          // seed
+          "8hQt"
         // "Po2n"
         // "0SbA"
         // "J73O"
@@ -462,7 +463,7 @@
       <span>&ensp;</span>
     {/if} -->
     {#each rubyTexts as r}
-      <ruby style="ruby-position: under;">
+      <ruby class="main-ruby" style="ruby-position: under;">
         <div style="display: flex; flex-direction:column;align-items: center;">
           <ruby style="ruby-position: over; ">
             {r.chars} <rt>{@html r.text}</rt>
