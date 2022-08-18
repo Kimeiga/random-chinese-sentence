@@ -105,6 +105,9 @@ body {
   text-align: center;
 
   font-family: 'Noto Serif SC', serif;
+
+  /* to prevent overflow */
+  width: 100vw;
 }
 
 #cmnText {
@@ -131,8 +134,8 @@ body {
   align-items: baseline;
 
   /* offset period */
-  position: relative;
-  left: 0.5ch;
+  /* position: relative; */
+  /* left: 0.5ch; */
 }
 
 #ruby rt {

@@ -83,6 +83,7 @@
         "https://tatoeba.elnu.com/?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
           // "https://dev.tatoeba.org/en/api_v0/search?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
           seed
+        // "Po2n"
         // "0SbA"
         // "J73O"
         // "TxWJ"
@@ -101,6 +102,13 @@
       chineseText = r.transcriptions[0].text;
     }
 
+    // change fullwidth final punctuation to halfwidth for better centering
+    if (chineseText[chineseText.length - 1] == "。") {
+      chineseText = chineseText.substring(0, chineseText.length - 1) + "｡";
+    } else if (chineseText[chineseText.length - 1] == "？") {
+      chineseText = chineseText.substring(0, chineseText.length - 1) + "?";
+    }
+
     // chineseText = "等他下次来时，我会把这件事告诉他。";
     // chineseText = "我听到这个消息时，简直不能相信自己的耳朵。";
     // chineseText = "瑪麗亞和納塔利婭去購物。他們為自己買些東西。";
@@ -112,7 +120,7 @@
     // document.getElementById("cmnText").innerText = chineseText;
 
     pinyinTextList = decodeEntities(r.transcriptions[1].html);
-    pinyinTextList = pinyinTextList.split(/[, .?";]/);
+    pinyinTextList = pinyinTextList.split(/[, .?";!]/);
     // pinyinTextList = r.transcriptions[1].html.split("[\\&\\;]");
     // pinyinTextList =
     //   "Mǎl&igrave;y&agrave; h&eacute; n&agrave; tǎ l&igrave; y&agrave; q&ugrave; g&ograve;uw&ugrave;. tāmen w&egrave;i z&igrave;jǐ mǎi xiē dōngxi.".split(
@@ -126,7 +134,7 @@
     //   "Děng tā xi&agrave;c&igrave; l&aacute;i sh&iacute;, wǒ hu&igrave; bǎ zh&egrave; ji&agrave;n sh&igrave; g&agrave;osu tā.".split(
     //     /[, ]/
     // );
-    console.log(pinyinTextList);
+    // console.log(pinyinTextList);
 
     // for (let p of pinyinTextList) {
     //   const node = document.createElement("p");
@@ -143,7 +151,7 @@
     //   "Maria and Natalia go shopping. They buy something for themselves.";
     // translationText = "I could hardly believe my ears when I heard the news.";
     // translationText = "I will tell him about it when he comes next time.";
-    console.log(translationText);
+    // console.log(translationText);
 
     document.getElementById("enText").innerText = translationText;
 
@@ -186,7 +194,7 @@
     // console.log(extractedVerbs);
 
     // figure out pinyin
-    let numeralPinyins = r.transcriptions[1].text.split(/[, .?";]/);
+    let numeralPinyins = r.transcriptions[1].text.split(/[, .?";!]/);
     // numeralPinyins =
     //   "Ma3li4ya4 he2 na4 ta3 li4 ya4 qu4 gou4wu4. ta1men5 wei4 zi4ji3 mai3 xie1 dong1xi5.".split(
     //     /[, .]/
@@ -199,21 +207,18 @@
     //   "Deng3 ta1 xia4ci4 lai2 shi2, wo3 hui4 ba3 zhe4 jian4 shi4 gao4su5 ta1.".split(
     //     /[, ]/
     //   );
-    console.log(numeralPinyins);
+    // console.log(numeralPinyins);
     let syllableArray = [];
     for (let n of numeralPinyins) {
       let syllableCount = n.match(/\d/g)?.length ?? (n.length || 1);
       syllableArray.push(syllableCount);
     }
-    console.log("syllableArray");
-    console.log(syllableArray);
-
-    let rubyElement = document.getElementById("ruby");
+    // console.log("syllableArray");
+    // console.log(syllableArray);
 
     let accChinese = 0;
-    let accPinyin = 0;
     for (let [i, n] of syllableArray.entries()) {
-      const node = document.createElement("ruby");
+      // const node = document.createElement("ruby");
       // if (chineseText[accChinese] == "，") {
       //   node.innerHTML = chineseText.slice(accChinese, accChinese + 1);
       //   rubyElement.appendChild(node);
@@ -245,55 +250,129 @@
       // }
     }
 
-    for (let rubyText of rubyTexts) {
-      let res = await (
-        await axios.get(
+    // new more efficient way to get definitions with Promise.all!
+    Promise.all(
+      rubyTexts.map((rubyText) =>
+        axios.get(
           "https://chinese-dictionary.azurewebsites.net/" + rubyText.chars
         )
-      ).data;
-      // console.log(r);
-      console.log(res);
+      )
+    )
+      .then((res) => res.map((res) => res.data))
+      .then((texts) => {
+        console.log("texts");
+        console.log(texts);
 
-      console.log(res.length && res[0].definitions);
-      let r;
+        for (const [i, rubyText] of rubyTexts.entries()) {
+          let res = texts[i];
+          if (res.length == 0) {
+            continue;
+          }
 
-      // filter out surnames
-      let res2 = res.filter((r) => !/[A-Z]/.test(r.pronunciation));
-      res = res2.length ? res2 : res;
+          // filter out surnames
+          let res2 = res.filter((r) => !/[A-Z]/.test(r.pronunciation));
+          res = res2.length ? res2 : res;
 
-      // filter out variants?
-      let res3 = res.filter((r) => !/variant/.test(r.definitions));
-      console.log(res3);
-      res = res3.length ? res3 : res;
+          // filter out variants?
+          let res3 = res.filter((r) => !/variant/.test(r.definitions));
+          console.log(res3);
+          res = res3.length ? res3 : res;
 
-      if (res.length) {
-        let first = res[0].definitions.match(/^[^;]*/);
-        if (first) {
-          r = first[0];
+          if (res.length) {
+            let first = res[0].definitions.match(/^[^;]*/);
+            if (first) {
+              r = first[0];
 
-          console.log(r);
+              console.log(r);
 
-          // you (informal, as opposed to courteous 您[nin2]) -> you
-          let r2 = r.replace(/\([^()]*\)/g, "").trim();
-          r = r2.length ? r2 : r;
-          console.log("r");
-          console.log(r);
-        } else {
-          // no ;
-          r = res[0].definitions;
+              // you (informal, as opposed to courteous 您[nin2]) -> you
+              let r2 = r.replace(/\([^()]*\)/g, "").trim();
+              r = r2.length ? r2 : r;
+              console.log("r");
+              console.log(r);
+            } else {
+              // no ;
+              r = res[0].definitions;
 
-          // you (informal, as opposed to courteous 您[nin2]) -> you
-          let r2 = r.replace(/\([^()]*\)/g, "").trim();
-          r = r2.length ? r2 : r;
-          console.log("r");
-          console.log(r);
+              // you (informal, as opposed to courteous 您[nin2]) -> you
+              let r2 = r.replace(/\([^()]*\)/g, "").trim();
+              r = r2.length ? r2 : r;
+              console.log("r");
+              console.log(r);
+            }
+          }
+
+          rubyText.def = r;
+          rubyTexts = rubyTexts;
         }
-      }
+      });
 
-      rubyText.def = r;
-      rubyTexts = rubyTexts;
-      // console.log(rubyTexts);
-    }
+    //   const fetchNames = async () => {
+    //   try {
+    //     const res = await Promise.all([
+    //       axios.get("https://chinese-dictionary.azurewebsites.net/" + rubyText.chars),
+    //       axios.get("./names-mid.json"),
+    //       axios.get("./names-old.json")
+    //     ]);
+    //     const data = res.map((res) => res.data);
+    //     console.log(data.flat());
+    //   } catch {
+    //     throw Error("Promise failed");
+    //   }
+    // };
+
+    // for (let rubyText of rubyTexts) {
+    //   if (rubyText.chars == "?" || rubyText.chars == "｡") {
+    //     return;
+    //   }
+    //   let res = await (
+    //     await axios.get(
+    //       "https://chinese-dictionary.azurewebsites.net/" + rubyText.chars
+    //     )
+    //   ).data;
+    //   // console.log(r);
+    //   console.log(res);
+
+    //   console.log(res.length && res[0].definitions);
+    //   let r;
+
+    //   // filter out surnames
+    //   let res2 = res.filter((r) => !/[A-Z]/.test(r.pronunciation));
+    //   res = res2.length ? res2 : res;
+
+    //   // filter out variants?
+    //   let res3 = res.filter((r) => !/variant/.test(r.definitions));
+    //   console.log(res3);
+    //   res = res3.length ? res3 : res;
+
+    //   if (res.length) {
+    //     let first = res[0].definitions.match(/^[^;]*/);
+    //     if (first) {
+    //       r = first[0];
+
+    //       console.log(r);
+
+    //       // you (informal, as opposed to courteous 您[nin2]) -> you
+    //       let r2 = r.replace(/\([^()]*\)/g, "").trim();
+    //       r = r2.length ? r2 : r;
+    //       console.log("r");
+    //       console.log(r);
+    //     } else {
+    //       // no ;
+    //       r = res[0].definitions;
+
+    //       // you (informal, as opposed to courteous 您[nin2]) -> you
+    //       let r2 = r.replace(/\([^()]*\)/g, "").trim();
+    //       r = r2.length ? r2 : r;
+    //       console.log("r");
+    //       console.log(r);
+    //     }
+    //   }
+
+    //   rubyText.def = r;
+    //   rubyTexts = rubyTexts;
+    //   // console.log(rubyTexts);
+    // }
 
     // if we are still missing a final ? we got to add it
     // if (rubyTexts[rubyTexts.length - 1].text[rubyTexts[rubyTexts.length - 1].text.length - 1] == "?"){
@@ -379,6 +458,9 @@
   {/if} -->
   <!-- <div id="ruby" /> -->
   <div id="ruby">
+    <!-- {#if chineseText && (chineseText[chineseText.length - 1] == "。" || chineseText[chineseText.length - 1] == "？")}
+      <span>&ensp;</span>
+    {/if} -->
     {#each rubyTexts as r}
       <ruby style="ruby-position: under;">
         <div style="display: flex; flex-direction:column;align-items: center;">
