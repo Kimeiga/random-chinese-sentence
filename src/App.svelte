@@ -83,6 +83,7 @@
         "https://tatoeba.elnu.com/?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
           // "https://dev.tatoeba.org/en/api_v0/search?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
           seed
+        // "h9ZP"
         // "8hQt"
         // "Po2n"
         // "0SbA"
@@ -278,6 +279,11 @@
           let res3 = res.filter((r) => !/variant/.test(r.definitions));
           console.log(res3);
           res = res3.length ? res3 : res;
+
+          // try to filter out definitions that use a different pronunciation
+          let res4 = res.filter((r) => r.pronunciation == rubyText.text);
+          console.log(res4);
+          res = res4.length ? res4 : res;
 
           if (res.length) {
             let first = res[0].definitions.match(/^[^;]*/);
