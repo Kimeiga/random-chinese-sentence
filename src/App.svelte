@@ -1,4 +1,8 @@
 <script>
+  let voice = window.speechSynthesis
+    .getVoices()
+    .filter((v) => v.lang.startsWith("zh"))[0];
+
   var decodeEntities = (function () {
     // this prevents any overhead from creating the object each time
     var element = document.createElement("div");
@@ -495,15 +499,26 @@
   on:click={() => {
     msg.text = chineseText;
     msg.lang = "zh";
+    msg.voice = voice;
     window.speechSynthesis.speak(msg);
   }}>Speak sentence</button
 >
+
 <button
   style="margin-left: 0.5rem;"
   on:click={() => {
     navigator.clipboard.writeText(chineseText);
   }}>Copy Chinese Sentence</button
 >
+<br />
+<br />
+{#if voice.lang == "zh-HK"}
+  <small>
+    The only Chinese voice on your browser is a Cantonese one lol. <br /> This
+    is probably MacOS Safari. <br /> Enjoy the Canto pronunciations but they will
+    be different than Mandarin just fair warning mate.
+  </small>
+{/if}
 
 <!-- <style>
   .logo {
