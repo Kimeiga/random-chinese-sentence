@@ -512,7 +512,7 @@
 >
 <br />
 <br />
-{#if voice.lang == "zh-HK"}
+{#if voice && voice.lang == "zh-HK"}
   <small>
     The only Chinese voice on your browser is a Cantonese one lol. <br /> This
     is probably MacOS Safari. <br /> Enjoy the Canto pronunciations but they will
