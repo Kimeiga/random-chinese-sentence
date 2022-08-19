@@ -257,15 +257,16 @@
       // }
     }
 
+    // todo ignore ? in rubyText.chars
     // new more efficient way to get definitions with Promise.all!
     Promise.all(
       rubyTexts.map((rubyText) =>
-        axios.get(
-          "https://chinese-dictionary.azurewebsites.net/" + rubyText.chars
-        )
+        axios
+          .get("https://chinese-dictionary.azurewebsites.net/" + rubyText.chars)
+          .catch((e) => console.error(e))
       )
     )
-      .then((res) => res.map((res) => res.data))
+      .then((res) => res.map((res) => (res ? res.data : [])))
       .then((texts) => {
         console.log("texts");
         console.log(texts);
