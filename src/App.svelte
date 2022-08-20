@@ -482,7 +482,7 @@
           </ruby>
 
           <p
-            style="font-size: 0.5rem; word-wrap: break-word;width: min-content; text-align: center; margin: 0;"
+            style="font-size: calc(0.4rem + 0.4vw); word-wrap: break-word;width: min-content; text-align: center; margin: 0;"
           >
             {r.def ?? ""}
           </p>
