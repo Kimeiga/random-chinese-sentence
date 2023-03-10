@@ -43,7 +43,14 @@ If you have state that's important to retain within a component, consider creati
 ```js
 // store.js
 // An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+import { writable } from "svelte/store";
+export default writable(0);
 ```
+
 # random-chinese-sentence
+
+Thought about using the Google Translate API to get the individual word translations since it will always be fast as opposed to my azure instance, but it will get things wrong like think 了 -> "up" instead of "(completed action marker)" like my cc-cedict api correctly says
+
+https://codepen.io/kimeiga/pen/ZEMawbd
+
+^ Here's an example of the google translate approach that I decided not to use.

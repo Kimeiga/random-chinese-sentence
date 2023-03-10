@@ -80,8 +80,6 @@ button:focus-visible {
   }
 } */
 
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;900&display=swap');
-
 p {
   /* font-family: sans-serif; */
   /* font-size: 36px; */
@@ -105,10 +103,15 @@ body {
   margin: 0;
   text-align: center;
 
-  font-family: 'Noto Serif SC', serif;
+  /* font-family: "Noto Serif SC", serif; */
+  font-family: "SongTi SC", serif;
 
   /* to prevent overflow */
   width: 100vw;
+}
+
+#container {
+  font-weight: 900;
 }
 
 #cmnText {
@@ -168,10 +171,10 @@ button {
   almost like IOS. */
   background: #000;
   color: #fff;
-  opacity: .4;
+  opacity: 0.4;
 
   padding: 0.5rem 1rem;
-  font-family: 'Noto Serif SC', serif;
+  font-family: "Noto Serif SC", serif;
   outline: 0;
   border: 0;
 
@@ -182,7 +185,7 @@ button {
 button:hover {
   background: #222;
   cursor: pointer;
-  opacity: .4;
+  opacity: 0.4;
 }
 
 .main-ruby {
