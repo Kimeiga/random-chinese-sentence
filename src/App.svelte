@@ -23,9 +23,11 @@
     return decodeHTMLEntities;
   })();
 
-  import axios from "axios";
-  import pos from "pos";
-  import chunker from "pos-chunker";
+  // import axios from "axios";
+  // import pos from "pos";
+  // import chunker from "pos-chunker";
+
+  let simplified = true;
 
   // import cedict from "coupling-dict-chinese";
   // cedict.searchByChinese("世界", (words) => {
@@ -76,28 +78,109 @@
   }
   let translationText;
   let chineseText;
+  let traditionalChineseText;
   let pinyinTextList;
   $: rubyTexts = [];
+
+  function SetBackgroundImage() {
+    // let words = new pos.Lexer().lex(translationText);
+    // let tags = new pos.Tagger()
+    //   .tag(words)
+    //   .map(function (tag) {
+    //     return tag[0] + "/" + tag[1];
+    //   })
+    //   .join(" ");
+
+    // // debugger;
+    // let nouns = chunker.chunk(tags, "[{ tag: NN|NNP|VBG }]");
+    // // console.log(nouns);
+    // let extractedNouns = [];
+    // let nouns2 = [...nouns.matchAll(/\{([^}]+)\}/g)];
+    // // console.log(nouns2);
+
+    // for (let n of nouns2) {
+    //   // console.log(n);
+    //   extractedNouns.push(n[1].match(/(.*?)\//)[1]);
+    // }
+
+    // console.log("extractedNouns");
+    // console.log(extractedNouns);
+
+    // remove short words
+    let extractedWords = translationText.split(" ").filter((x) => x.length > 4);
+
+    if (extractedWords.length == 0) {
+      extractedWords = translationText.split(" ").filter((x) => x.length > 3);
+    }
+
+    if (extractedWords.length == 0) {
+      extractedWords = translationText.split(" ").filter((x) => x.length > 2);
+    }
+
+    // remove words with apostrophe's like "didn't"
+    let noApostrophes = extractedWords.filter((x) => x.indexOf("'") == -1);
+    if (noApostrophes) extractedWords = noApostrophes;
+
+    console.log("extractedWords");
+    console.log(extractedWords);
+
+    let backgroundImageURL = `url("https://source.unsplash.com/random/?${extractedWords.join()}")`;
+
+    // console.log(backgroundImageURL);
+
+    document.body.style.backgroundImage = backgroundImageURL;
+  }
+
+  // function SetBackgroundImage() {
+  //   let words = new pos.Lexer().lex(translationText);
+  //   let tags = new pos.Tagger()
+  //     .tag(words)
+  //     .map(function (tag) {
+  //       return tag[0] + "/" + tag[1];
+  //     })
+  //     .join(" ");
+
+  //   // debugger;
+  //   let nouns = chunker.chunk(tags, "[{ tag: NN|NNP|VBG }]");
+  //   // console.log(nouns);
+  //   let extractedNouns = [];
+  //   let nouns2 = [...nouns.matchAll(/\{([^}]+)\}/g)];
+  //   // console.log(nouns2);
+
+  //   for (let n of nouns2) {
+  //     // console.log(n);
+  //     extractedNouns.push(n[1].match(/(.*?)\//)[1]);
+  //   }
+
+  //   // console.log("extractedNouns");
+  //   // console.log(extractedNouns);
+
+  //   let backgroundImageURL = `url("https://source.unsplash.com/random/?${extractedNouns.join()}")`;
+
+  //   // console.log(backgroundImageURL);
+
+  //   document.body.style.backgroundImage = backgroundImageURL;
+  // }
 
   (async () => {
     const seed = makeid(4);
     console.log(seed);
-    let a = await axios
-      .get(
-        "https://tatoeba.elnu.com/?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
-          // "https://dev.tatoeba.org/en/api_v0/search?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
-          seed
-        // WUHp sex
-        // "h9ZP"
-        // "8hQt"
-        // "Po2n"
-        // "0SbA"
-        // "J73O"
-        // "TxWJ"
-        // "PSlA"
-        // "JnkI"
-      )
-      .then((r) => r.data);
+    let a = await fetch(
+      "https://tatoeba.elnu.com/?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&limit=1&rand_seed=" +
+        // "https://dev.tatoeba.org/en/api_v0/search?from=cmn&orphans=no&sort=random&to=eng&trans_filter=limit&trans_to=eng&unapproved=no&rand_seed=" +
+        seed
+      // WUHp sex
+      // "h9ZP"
+      // "8hQt"
+      // "Po2n"
+      // "0SbA"
+      // "J73O"
+      // "TxWJ"
+      // "PSlA"
+      // "JnkI"
+    ).then((response) => response.json());
+
+    // TODO: Cvy4
 
     let r = a.results[0];
 
@@ -105,8 +188,13 @@
 
     if (r.script == "Hans") {
       chineseText = r.text;
+      traditionalChineseText = r.transcriptions[0].text;
+    } else if (r.script == "Hant") {
+      traditionalChineseText = r.text;
+      chineseText = r.transcriptions[0].text;
     } else {
       chineseText = r.transcriptions[0].text;
+      traditionalChineseText = r.text;
     }
 
     // change fullwidth final punctuation to halfwidth for better centering
@@ -114,6 +202,18 @@
       chineseText = chineseText.substring(0, chineseText.length - 1) + "｡";
     } else if (chineseText[chineseText.length - 1] == "？") {
       chineseText = chineseText.substring(0, chineseText.length - 1) + "?";
+    }
+
+    if (traditionalChineseText[traditionalChineseText.length - 1] == "。") {
+      traditionalChineseText =
+        traditionalChineseText.substring(0, traditionalChineseText.length - 1) +
+        "｡";
+    } else if (
+      traditionalChineseText[traditionalChineseText.length - 1] == "？"
+    ) {
+      traditionalChineseText =
+        traditionalChineseText.substring(0, traditionalChineseText.length - 1) +
+        "?";
     }
 
     // chineseText = "等他下次来时，我会把这件事告诉他。";
@@ -162,35 +262,6 @@
 
     document.getElementById("enText").innerText = translationText;
 
-    let words = new pos.Lexer().lex(translationText);
-    let tags = new pos.Tagger()
-      .tag(words)
-      .map(function (tag) {
-        return tag[0] + "/" + tag[1];
-      })
-      .join(" ");
-
-    // debugger;
-    let nouns = chunker.chunk(tags, "[{ tag: NN|NNP|VBG }]");
-    // console.log(nouns);
-    let extractedNouns = [];
-    let nouns2 = [...nouns.matchAll(/\{([^}]+)\}/g)];
-    // console.log(nouns2);
-
-    for (let n of nouns2) {
-      // console.log(n);
-      extractedNouns.push(n[1].match(/(.*?)\//)[1]);
-    }
-
-    // console.log("extractedNouns");
-    // console.log(extractedNouns);
-
-    let backgroundImageURL = `url("https://source.unsplash.com/random/?${extractedNouns.join()}")`;
-
-    // console.log(backgroundImageURL);
-
-    document.body.style.backgroundImage = backgroundImageURL;
-
     // let extractedVerbs = [];
     // let verbs = chunker.chunk(tags, "[{ tag: VB|VBP }]");
 
@@ -201,7 +272,7 @@
     // console.log(extractedVerbs);
 
     // figure out pinyin
-    let numeralPinyins = r.transcriptions[1].text.split(/[, .?";!]/);
+    let numeralPinyins = r.transcriptions[1].text.split(/[, .?";!”“]/);
     // numeralPinyins =
     //   "Ma3li4ya4 he2 na4 ta3 li4 ya4 qu4 gou4wu4. ta1men5 wei4 zi4ji3 mai3 xie1 dong1xi5.".split(
     //     /[, .]/
@@ -248,6 +319,10 @@
         ...rubyTexts,
         {
           chars: chineseText.slice(accChinese, accChinese + n),
+          traditionalChars: traditionalChineseText.slice(
+            accChinese,
+            accChinese + n
+          ),
           text: pinyinTextList[i],
         },
       ];
@@ -257,68 +332,7 @@
       // }
     }
 
-    // todo ignore ? in rubyText.chars
-    // new more efficient way to get definitions with Promise.all!
-    Promise.all(
-      rubyTexts.map((rubyText) =>
-        axios
-          .get("https://chinese-dictionary.azurewebsites.net/" + rubyText.chars)
-          .catch((e) => console.error(e))
-      )
-    )
-      .then((res) => res.map((res) => (res ? res.data : [])))
-      .then((texts) => {
-        console.log("texts");
-        console.log(texts);
-
-        for (const [i, rubyText] of rubyTexts.entries()) {
-          let res = texts[i];
-          if (res.length == 0) {
-            continue;
-          }
-
-          // filter out surnames
-          let res2 = res.filter((r) => !/[A-Z]/.test(r.pronunciation));
-          res = res2.length ? res2 : res;
-
-          // filter out variants?
-          let res3 = res.filter((r) => !/variant/.test(r.definitions));
-          console.log(res3);
-          res = res3.length ? res3 : res;
-
-          // try to filter out definitions that use a different pronunciation
-          let res4 = res.filter((r) => r.pronunciation == rubyText.text);
-          console.log(res4);
-          res = res4.length ? res4 : res;
-
-          if (res.length) {
-            let first = res[0].definitions.match(/^[^;]*/);
-            if (first) {
-              r = first[0];
-
-              console.log(r);
-
-              // you (informal, as opposed to courteous 您[nin2]) -> you
-              let r2 = r.replace(/\([^()]*\)/g, "").trim();
-              r = r2.length ? r2 : r;
-              console.log("r");
-              console.log(r);
-            } else {
-              // no ;
-              r = res[0].definitions;
-
-              // you (informal, as opposed to courteous 您[nin2]) -> you
-              let r2 = r.replace(/\([^()]*\)/g, "").trim();
-              r = r2.length ? r2 : r;
-              console.log("r");
-              console.log(r);
-            }
-          }
-
-          rubyText.def = r;
-          rubyTexts = rubyTexts;
-        }
-      });
+    getIndividualWordTranslations();
 
     //   const fetchNames = async () => {
     //   try {
@@ -422,8 +436,80 @@
     // }
 
     // console.log(rubyTexts);
+
+    SetBackgroundImage();
   })();
   let msg = new SpeechSynthesisUtterance();
+
+  function getIndividualWordTranslations() {
+    // todo ignore ? in rubyText.chars
+    // new more efficient way to get definitions with Promise.all!
+    Promise.all(
+      rubyTexts.map((rubyText) =>
+        fetch("https://chinese-dictionary.azurewebsites.net/" + rubyText.chars)
+          .then((response) => response.json())
+          .catch((e) => console.error(e))
+      )
+    )
+      // .then((res) => res.map((res) => (res ? res.data : [])))
+      .then((texts) => {
+        console.log("texts");
+        console.log(texts);
+
+        for (const [i, rubyText] of rubyTexts.entries()) {
+          let res = texts[i];
+          if (res.length == 0) {
+            continue;
+          }
+
+          // filter out surnames
+          let res2 = res.filter((r) => !/[A-Z]/.test(r.pronunciation));
+          res = res2.length ? res2 : res;
+
+          // filter out variants?
+          let res3 = res.filter((r) => !/variant/.test(r.definitions));
+          console.log(res3);
+          res = res3.length ? res3 : res;
+
+          // try to filter out definitions that use a different pronunciation
+          let res4 = res.filter((r) => r.pronunciation == rubyText.text);
+          console.log(res4);
+          res = res4.length ? res4 : res;
+          let r;
+
+          // Todo: UUTa
+          // 得
+          // structural particle: used after a verb , linking it to following phrase indicating effect, degree, possibility etc
+
+          if (res.length) {
+            let first = res[0].definitions.match(/^[^;]*/);
+            if (first) {
+              r = first[0];
+
+              console.log(r);
+
+              // you (informal, as opposed to courteous 您[nin2]) -> you
+              let r2 = r.replace(/\([^()]*\)/g, "").trim();
+              r = r2.length ? r2 : r;
+              console.log("r");
+              console.log(r);
+            } else {
+              // no ;
+              r = res[0].definitions;
+
+              // you (informal, as opposed to courteous 您[nin2]) -> you
+              let r2 = r.replace(/\([^()]*\)/g, "").trim();
+              r = r2.length ? r2 : r;
+              console.log("r");
+              console.log(r);
+            }
+          }
+
+          rubyText.def = r;
+          rubyTexts = rubyTexts;
+        }
+      });
+  }
 </script>
 
 <!-- 
@@ -474,21 +560,32 @@
     <!-- {#if chineseText && (chineseText[chineseText.length - 1] == "。" || chineseText[chineseText.length - 1] == "？")}
       <span>&ensp;</span>
     {/if} -->
-    {#each rubyTexts as r}
-      <ruby class="main-ruby" style="ruby-position: under;">
-        <div style="display: flex; flex-direction:column;align-items: center;">
-          <ruby style="ruby-position: over; ">
-            {r.chars} <rt>{@html r.text}</rt>
-          </ruby>
-
-          <p
-            style="font-size: calc(0.4rem + 0.4vw); word-wrap: break-word;width: min-content; text-align: center; margin: 0;"
+    {#if rubyTexts.length > 0}
+      {#each rubyTexts as r}
+        <ruby class="main-ruby" style="ruby-position: under;">
+          <div
+            style="display: flex; flex-direction:column;align-items: center;"
           >
-            {r.def ?? ""}
-          </p>
-        </div>
-      </ruby>
-    {/each}
+            <ruby style="ruby-position: over; ">
+              {#if simplified}
+                {r.chars}
+              {:else}
+                {r.traditionalChars}
+              {/if}
+              <rt>{@html r.text}</rt>
+            </ruby>
+
+            <p
+              style="font-size: calc(0.5rem + 0.45vw); word-wrap: break-word;width: fit-content; text-align: center; margin: 0;"
+            >
+              {r.def ?? ""}
+            </p>
+          </div>
+        </ruby>
+      {/each}
+    {:else}
+      <small>Generating Chinese Sentence...</small>
+    {/if}
   </div>
 </div>
 
@@ -499,8 +596,9 @@
 <button
   on:click={() => {
     msg.text = chineseText;
-    msg.lang = "zh";
+    msg.lang = "zh-CN";
     msg.voice = voice;
+    msg.rate = 0.8;
     window.speechSynthesis.speak(msg);
   }}>Speak sentence</button
 >
@@ -508,9 +606,42 @@
 <button
   style="margin-left: 0.5rem;"
   on:click={() => {
-    navigator.clipboard.writeText(chineseText);
+    navigator.clipboard.writeText(
+      simplified ? chineseText : traditionalChineseText
+    );
   }}>Copy Chinese Sentence</button
 >
+
+<button
+  style="margin-left: 0.5rem;"
+  on:click={() => {
+    // console.log(chineseText + " -> " + converterToTraditional(chineseText));
+
+    // chineseText = converterToTraditional(chineseText);
+
+    simplified = !simplified;
+
+    // if (simplified) {
+    //   rubyTexts = rubyTexts.map((r) => ({
+    //     text: r.text,
+    //     chars: converterToTraditional(r.chars),
+    //   }));
+    //   simplified = false;
+    // } else {
+    //   rubyTexts = rubyTexts.map((r) => ({
+    //     text: r.text,
+    //     chars: converterToSimplified(r.chars),
+    //   }));
+    //   simplified = true;
+    // }
+  }}
+>
+  Change to {#if simplified}
+    Traditional
+  {:else}
+    Simplified
+  {/if} Characters
+</button>
 <br />
 <br />
 {#if voice && voice.lang == "zh-HK"}
