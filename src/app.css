@@ -104,7 +104,7 @@ body {
   text-align: center;
 
   /* font-family: "Noto Serif SC", serif; */
-  font-family: "SongTi SC", serif;
+  font-family: serif, "SongTi SC", "KaiTi";
 
   /* to prevent overflow */
   width: 100vw;
